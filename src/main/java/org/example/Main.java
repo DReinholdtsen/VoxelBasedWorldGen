@@ -17,6 +17,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.*;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.network.packet.server.play.UpdateViewDistancePacket;
 import org.example.TerrainGeneration.TerrainGenerator;
 
 import java.util.Random;
@@ -24,12 +25,12 @@ import java.util.Random;
 public class Main {
     public static void main(String[] args) {
         // Initialization
+        System.setProperty("minestom.chunk-view-distance", "32");
         MinecraftServer minecraftServer = MinecraftServer.init();
 
         // Create the instance
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         InstanceContainer instanceContainer = instanceManager.createInstanceContainer();
-
         // Set the ChunkGenerator and add default bright lighting everywhere
         instanceContainer.setGenerator(new TerrainGenerator(100).getGenerator());
         instanceContainer.setChunkSupplier(LightingChunk::new);
@@ -44,6 +45,9 @@ public class Main {
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
             player.setGameMode(GameMode.CREATIVE);
+            player.sendPacket(new UpdateViewDistancePacket(32));
+            player.setFlyingSpeed(4);
+
         });
 
         // Start the server on port 25565
