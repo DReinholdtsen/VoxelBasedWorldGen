@@ -16,14 +16,14 @@ import java.util.ArrayList;
 // Contained a generator (Consumer of GenerationUnit) which is added to instance
 public class TerrainGenerator {
     // stores key values such as seed and to preserve one noise source
-    private final int seed;
+    public static int seed;
     private ArrayList<HeightGenerator> elevationNoises;
     private Generator generator;
     private BiomeGenerator biomeGenerator;
     // Initialize a TerrainGenerator object using a seed
     public TerrainGenerator(int seed) {
         // Initializes variables and creates primary noise source for terrain
-        this.seed = seed;
+        TerrainGenerator.seed = seed;
         // initializes all height generators
         initializeHeightGenerators();
         // creates biome generator
@@ -33,6 +33,7 @@ public class TerrainGenerator {
             Point size = unit.size();
             for (int x = 0; x < size.blockX(); x++) {
                 for (int z = 0; z < size.blockZ(); z++) {
+                    Heightmap unitHeightmap = new Heightmap(size.blockX(), size.blockZ());
                     Point bottom = start.add(x, 0, z);
                     double doubleHeight = 0;
                     // adds height from all generators
@@ -42,16 +43,25 @@ public class TerrainGenerator {
                     int height = (int) doubleHeight;
                     Biome biome = biomeGenerator.getBiome(bottom.blockX(), bottom.blockZ());
                     // limit height to max height of unit
-                    int y = Math.min(height, size.blockY() - start.blockY());
-                    unit.modifier().fill(bottom, bottom.add(1, y, 1), biome.getSurfaceBlock());
+                    height = Math.min(height, size.blockY() - start.blockY());
+
                     // System.out.println(bottom + " " + bottom.add(1, y, 1));
+                    unitHeightmap.setHeight(x, z, height);
+                    biome.generateUnit(unit, unitHeightmap);
+
                 }
             }
         };
     }
     private void initializeHeightGenerators() {
         elevationNoises = new ArrayList<HeightGenerator>();
-        HeightGenerator base = new HeightGenerator(seed, .01, noiseValue -> ((noiseValue + 1) * 10) + 1);
+        HeightGenerator base = new HeightGenerator(seed, .01, noiseValue -> ((noiseValue + 1) * 10));
+        elevationNoises.add(new HeightGenerator(seed, .005, noiseValue -> ((noiseValue + 1) * 5)));
+        elevationNoises.add(new HeightGenerator(seed, .0025, noiseValue -> ((noiseValue + 1) * 2.5)));
+        elevationNoises.add(new HeightGenerator(seed, .00125, noiseValue -> ((noiseValue + 1) * 1.25)));
+        elevationNoises.add(new HeightGenerator(seed, .0006, noiseValue -> ((noiseValue + 1) * .6)));
+        elevationNoises.add(new HeightGenerator(seed, .0003, noiseValue -> ((noiseValue + 1) * .3)));
+
 
         HeightGenerator smallHills = smallHillsGenerator();
         HeightGenerator mountains = mountainsGenerator();
@@ -92,5 +102,10 @@ public class TerrainGenerator {
             val = val * 42000;
             return val;
         });
+    }
+
+    // returns the seed of the given world
+    public int getSeed() {
+        return seed;
     }
 }
