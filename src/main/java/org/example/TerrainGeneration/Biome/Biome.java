@@ -3,6 +3,7 @@ package org.example.TerrainGeneration.Biome;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
+import net.minestom.server.registry.DynamicRegistry;
 import org.example.TerrainGeneration.Biome.Decorators.Decorator;
 import org.example.TerrainGeneration.Heightmap;
 import org.example.TerrainGeneration.TerrainGenerator;
@@ -14,10 +15,13 @@ public class Biome {
     private Block surfaceBlock;
     private Decorator decorator;
     private int seed;
+    private DynamicRegistry.Key<net.minestom.server.world.biome.Biome> biomeKey;
 
-    public Biome(Block surfaceBlock) {
+    public Biome(Block surfaceBlock, Decorator decorator, DynamicRegistry.Key<net.minestom.server.world.biome.Biome> biomeKey) {
         this.surfaceBlock = surfaceBlock;
         this.seed = TerrainGenerator.seed;
+        this.decorator = decorator;
+        this.biomeKey = biomeKey;
     }
 
     public Block getSurfaceBlock() {
@@ -39,14 +43,11 @@ public class Biome {
         }
     }
 
-    public void addDecoration(GenerationUnit unit, int x, int z, Random random, int surfaceHeight) {
-        if (random.nextDouble() > .01) {
-            // no decoration, return
-            return;
-        }
-        Point bottom = unit.absoluteStart().add(x, surfaceHeight, z);
-        int decorationHeight = random.nextInt(3) + 1;
-        unit.modifier().fill(bottom, bottom.add(1, decorationHeight, 1), Block.CACTUS);
+    public void addDecoration(GenerationUnit unit, int x, int z, Random random, int y) {
+        this.decorator.addDecoration(unit, x, z, random, y);
     }
 
+    public DynamicRegistry.Key<net.minestom.server.world.biome.Biome> getBiomeKey() {
+        return this.biomeKey;
+    }
 }

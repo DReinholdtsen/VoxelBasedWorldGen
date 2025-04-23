@@ -19,7 +19,6 @@ public class DesertDecorator implements Decorator {
         Point bottom = unit.absoluteStart().add(x, surfaceHeight, z);
         int decorationHeight = random.nextInt(3) + 1;
         unit.modifier().fill(bottom, bottom.add(1, decorationHeight, 1), Block.CACTUS);
-
     }
 
 }

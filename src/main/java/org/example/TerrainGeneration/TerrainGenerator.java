@@ -4,13 +4,18 @@ import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
 import de.articdive.jnoise.pipeline.JNoise;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.Generator;
+import net.minestom.server.registry.DynamicRegistry;
 import org.example.TerrainGeneration.Biome.Biome;
 import org.example.TerrainGeneration.Biome.BiomeGenerator;
+import org.example.TerrainGeneration.Biome.Biomes;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 // Represents a terrain generator object, with parameters dictating how the terrain is generated
 // Contained a generator (Consumer of GenerationUnit) which is added to instance
@@ -31,6 +36,7 @@ public class TerrainGenerator {
         this.generator = unit -> {
             Point start = unit.absoluteStart();
             Point size = unit.size();
+            Random random = new Random((long) (Math.pow(start.blockX(), 2) + Math.pow(start.blockZ(), 2)));
             for (int x = 0; x < size.blockX(); x++) {
                 for (int z = 0; z < size.blockZ(); z++) {
                     Heightmap unitHeightmap = new Heightmap(size.blockX(), size.blockZ());
@@ -43,12 +49,16 @@ public class TerrainGenerator {
                     int height = (int) doubleHeight;
                     Biome biome = biomeGenerator.getBiome(bottom.blockX(), bottom.blockZ());
                     // limit height to max height of unit
+                    // set in game biome
                     height = Math.min(height, size.blockY() - start.blockY());
 
-                    // System.out.println(bottom + " " + bottom.add(1, y, 1));
-                    unitHeightmap.setHeight(x, z, height);
-                    biome.generateUnit(unit, unitHeightmap);
 
+                    unit.modifier().fill(bottom, bottom.add(1, height, 1), biome.getSurfaceBlock());
+                    for (int currentHeight = 0; currentHeight <= height; currentHeight++) {
+                        unit.modifier().setBiome(bottom.add(0, currentHeight, 0), biome.getBiomeKey());
+                    }
+                    unitHeightmap.setHeight(x, z, height);
+                    biome.addDecoration(unit, x, z, random, height);
                 }
             }
         };
