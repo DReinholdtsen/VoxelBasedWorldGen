@@ -37,7 +37,7 @@ public class BiomeGenerator {
 
     // adds biomes to list of biomes, will later use JSON parsing
     private void fillBiomeArray() {
-        // TODO: add biomes
+
         IDtoBiome.put(Biomes.PLAINS, new Biome(Block.GRASS_BLOCK, new PlainsDecorator(), net.minestom.server.world.biome.Biome.PLAINS));
         IDtoBiome.put(Biomes.SAVANNAH, new Biome(Block.ORANGE_WOOL, new EmptyDecorator(), net.minestom.server.world.biome.Biome.SAVANNA));
         IDtoBiome.put(Biomes.MOUNTAINS, new Biome(Block.STONE, new EmptyDecorator(), net.minestom.server.world.biome.Biome.STONY_PEAKS));
