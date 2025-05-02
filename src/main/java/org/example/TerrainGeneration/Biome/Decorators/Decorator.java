@@ -6,8 +6,11 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface Decorator {
     public void addDecoration(GenerationUnit unit, int x, int z, Random random, int surfaceHeight);
@@ -44,4 +47,6 @@ public interface Decorator {
             }
         };
     }
+
+
 }
