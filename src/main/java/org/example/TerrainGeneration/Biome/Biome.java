@@ -31,22 +31,23 @@ public class Biome {
     public void generateUnit(GenerationUnit unit, Heightmap heightmap) {
         Point start = unit.absoluteStart();
         Point size = unit.size();
-        Random random = new Random((long) (Math.pow(start.blockX(), 3) + Math.pow(start.blockZ(), 2) + this.seed));
         for (int z = 0; z < heightmap.getzSize(); z++) {
             for (int x = 0; x < heightmap.getxSize(); x++) {
                 Point bottom = start.add(x, 0, z);
                 int y = heightmap.getHeight(x, z);
                 unit.modifier().fill(bottom, bottom.add(1, y, 1), this.getSurfaceBlock());
 
-                decorator.addDecoration(unit, x, z, random, y);
+                decorator.addDecoration(unit, x, z, y);
             }
         }
     }
 
-    public void addDecoration(GenerationUnit unit, int x, int z, Random random, int y) {
-        this.decorator.addDecoration(unit, x, z, random, y);
+    public void addDecoration(GenerationUnit unit, int x, int z, int y) {
+        this.decorator.addDecoration(unit, x, z, y);
     }
-
+    public Decorator getDecorator() {
+        return this.decorator;
+    }
     public DynamicRegistry.Key<net.minestom.server.world.biome.Biome> getBiomeKey() {
         return this.biomeKey;
     }

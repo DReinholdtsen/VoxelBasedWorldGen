@@ -5,6 +5,10 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
+import org.example.TerrainGeneration.Biome.Biome;
+import org.example.TerrainGeneration.Biome.BiomeGenerator;
+import org.example.TerrainGeneration.PointUtils;
+import org.example.TerrainGeneration.TerrainGenerator;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -13,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface Decorator {
-    public void addDecoration(GenerationUnit unit, int x, int z, Random random, int surfaceHeight);
+    public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight);
 
     public static Consumer<Block.Setter> createTreeSetter(Point decorationPos, int height) {
         return setter -> {
@@ -46,6 +50,33 @@ public interface Decorator {
                 }
             }
         };
+    }
+    public static boolean validTreeLocation(int x, int z) {
+        // check n by n before tree location for other trees
+        for (int deltaX = -4; deltaX < 5; deltaX++) {
+            for (int deltaZ = -4; deltaZ <= 0; deltaZ++) {
+                if (deltaZ == 0) {
+                    if (deltaX >= 0) {
+                        continue;
+                    }
+                    // dont check, has tree if this is called
+                }
+                int newX = x + deltaX;
+                int newZ = z + deltaZ;
+                Decorator decorator = TerrainGenerator.biomeGenerator.getBiome(newX, newZ).getDecorator();
+                double value = PointUtils.randomFromCoordinate(TerrainGenerator.seed, newX, newZ);
+                if (decorator instanceof PlainsDecorator) {
+                    if (value < ((PlainsDecorator) decorator).treeThreshold) {
+                        return false;
+                    }
+                } else if (decorator instanceof ForestDecorator) {
+                    if (value < ((ForestDecorator) decorator).treeThreshold) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
 

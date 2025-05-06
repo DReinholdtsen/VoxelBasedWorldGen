@@ -24,7 +24,7 @@ public class TerrainGenerator {
     public static int seed;
     private ArrayList<HeightGenerator> elevationNoises;
     private Generator generator;
-    private BiomeGenerator biomeGenerator;
+    public static BiomeGenerator biomeGenerator;
     // Initialize a TerrainGenerator object using a seed
     public TerrainGenerator(int seed) {
         // Initializes variables and creates primary noise source for terrain
@@ -58,7 +58,7 @@ public class TerrainGenerator {
                         unit.modifier().setBiome(bottom.add(0, currentHeight, 0), biome.getBiomeKey());
                     }
                     unitHeightmap.setHeight(x, z, height);
-                    biome.addDecoration(unit, x, z, random, height);
+                    biome.addDecoration(unit, x, z, height);
                 }
             }
         };
@@ -118,4 +118,6 @@ public class TerrainGenerator {
     public int getSeed() {
         return seed;
     }
+
+
 }

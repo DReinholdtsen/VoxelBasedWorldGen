@@ -8,7 +8,7 @@ public class EmptyDecorator implements Decorator {
     public EmptyDecorator() {
 
     }
-    public void addDecoration(GenerationUnit unit, int x, int z, Random random, int surfaceHeight) {
+    public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
 
     }
 

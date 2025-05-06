@@ -24,6 +24,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.UpdateViewDistancePacket;
 import org.example.TerrainGeneration.Biome.Decorators.Decorator;
+import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
 import java.util.Random;
@@ -34,7 +35,7 @@ public class Main {
     static BlockVec p3;
     public static void main(String[] args) {
         // Initialization
-        System.setProperty("minestom.chunk-view-distance", "32");
+        System.setProperty("minestom.chunk-view-distance", "3");
         MinecraftServer minecraftServer = MinecraftServer.init();
 
         // Create the instance
@@ -55,11 +56,11 @@ public class Main {
             final Player player = event.getPlayer();
             player.setGameMode(GameMode.CREATIVE);
             player.sendPacket(new UpdateViewDistancePacket(32));
-            player.setFlyingSpeed(4);
+            player.setFlyingSpeed(1);
             player.getInventory().addItemStack(ItemStack.of(Material.WHITE_WOOL));
             player.getInventory().addItemStack(ItemStack.of(Material.GRAY_WOOL));
             player.getInventory().addItemStack(ItemStack.of(Material.BLACK_WOOL));
-            player.getInventory().addItemStack(ItemStack.of(Material.STONE));
+            player.getInventory().addItemStack(ItemStack.of(Material.OAK_LOG));
         });
 
         globalEventHandler.addListener(PlayerBlockPlaceEvent.class, event -> {
@@ -74,7 +75,7 @@ public class Main {
             }
                 });
         globalEventHandler.addListener(PlayerChatEvent.class, event -> {
-            for (Point point : Decorator.bezierCurve(p1, p2, p3)) {
+            for (Point point : PointUtils.bezierCurve(p1, p2, p3)) {
                 System.out.println(point);
                 instanceContainer.setBlock(point, Block.RED_WOOL);
             }

@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -19,11 +20,7 @@ public class PointUtils {
             curvePoints.add(bezierPoint((double) i / 100, point1, point2, point3));
         }
         // points after thickness
-        Set<Point> points = new HashSet<Point>();
-        for (Point point : curvePoints) {
-
-        }
-        return points;
+        return curvePoints;
     }
 
     public static Point bezierPoint(double t, Point p0, Point p1, Point p2)
@@ -51,5 +48,14 @@ public class PointUtils {
                 }
             }
         }
+        return points;
+    }
+
+    public static double randomFromCoordinate(int seed, int x, int z) {
+         long h = seed * 374761393 + x * 668265263 + z * 2246822519L;
+         h = (h ^ (h >> 13)) * 1274126177;
+         h = h ^ (h >> 16);
+         long unsigned = Math.abs(h);
+         return (unsigned & 0xFFFFFFFFL) / (double)(1L << 32);
     }
 }
