@@ -28,6 +28,7 @@ import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
 import java.util.Random;
+import java.util.function.BiFunction;
 
 public class Main {
     static BlockVec p1;
@@ -75,8 +76,15 @@ public class Main {
             }
                 });
         globalEventHandler.addListener(PlayerChatEvent.class, event -> {
+            /*
             for (Point point : PointUtils.bezierCurve(p1, p2, p3)) {
                 System.out.println(point);
+                instanceContainer.setBlock(point, Block.RED_WOOL);
+            }*/
+            BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
+                return 2 + 12 * Math.pow(Math.sin(2*theta), 10);
+            };
+            for (Point point : PointUtils.verticalTube(p1, 1, radiusFunction)) {
                 instanceContainer.setBlock(point, Block.RED_WOOL);
             }
         });

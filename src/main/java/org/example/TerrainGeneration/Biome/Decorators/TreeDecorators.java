@@ -1,5 +1,44 @@
 package org.example.TerrainGeneration.Biome.Decorators;
 
-public class TreeDecorators {
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.block.Block;
 
+import java.util.function.Consumer;
+
+public class TreeDecorators {
+    /*
+    public static Consumer<Block.Setter> largeTreeSetter(Point decorationPos, int seed) {
+
+        return setter -> {
+
+            for (int y = 0; y < height; y++) {
+                setter.setBlock(decorationPos.add(0, y, 0), Block.OAK_LOG);
+            }
+            for (int x = -2; x <= 2; x++) {
+                // x coordinate for leaves relative to trunk
+                for (int z = -2; z <= 2; z++) {
+                    // same thing
+                    // check to make sure not overriding trunk
+                    int startHeight = height - 3;
+                    int maxHeight = height + 1;
+                    if (Math.abs(x) == 2 && Math.abs(z) == 2) {
+                        // no corners
+                        continue;
+                    }
+                    if (x == 0 && z == 0) {
+                        startHeight = height;
+                        maxHeight += 1;
+                    }
+                    if (Math.abs(x) == 2 || Math.abs(z) == 2) {
+                        maxHeight -= 1;
+                    }
+                    for (int y = startHeight; y < maxHeight; y++) {
+                        setter.setBlock(decorationPos.add(x, y, z), Block.OAK_LEAVES);
+                    }
+
+                }
+            }
+        };
+    }
+    */
 }
