@@ -11,7 +11,7 @@ import org.example.TerrainGeneration.TerrainGenerator;
 import java.util.Random;
 
 public class ForestDecorator implements Decorator {
-    public double treeThreshold = .25;
+    public double treeThreshold = .05;
     public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
         Point decorationPos = unit.absoluteStart().add(x, surfaceHeight, z);
         double randomVal = PointUtils.randomFromCoordinate(TerrainGenerator.seed, decorationPos.blockX(), decorationPos.blockZ());
