@@ -14,7 +14,7 @@ public class PointUtils {
     public static final Function<Point, Double> EUCLIDEAN = point -> point.distanceSquared(Pos.ZERO);
     public static final Function<Point, Double> CUBE = point -> Math.max(Math.max(point.x(), point.y()), point.z());
     public static Set<Point> bezierCurve(Point point1, Point point2, Point point3) {
-        return bezierCurve(point1, point2, point3, t -> 0d, EUCLIDEAN);
+        return bezierCurve(point1, point2, point3, t -> 1d, EUCLIDEAN);
     }
     public static Set<Point> bezierCurve(Point point1, Point point2, Point point3, Function<Double, Double> thicknessFunction) {
         return bezierCurve(point1, point2, point3, thicknessFunction, EUCLIDEAN);
@@ -74,70 +74,96 @@ public class PointUtils {
     }
     // returns a set of points (roughly cylindrical) from bottom pos up by height
     // radiusFunction represents the radius at a specific height (arg 1) and theta (arg 2)
-    public static Set<BlockVec> verticalTube(Point bottomPos, int height, BiFunction<Integer, Double, Double> radiusFunction) {
+    // centerShift is a function that returns a point that shifts the center of the shape based on height
+    public static Set<BlockVec> verticalTube(Point bottomPos, int height, BiFunction<Integer, Double, Double> radiusFunction, Function<Integer, Point>  centerShift) {
         Set<BlockVec> points = new HashSet<BlockVec>();
+        // adjust to center of block
         bottomPos = bottomPos.add(.5, 0, .5);
         for (int currentHeight = 0; currentHeight < height; currentHeight++) {
+            Point innerPoint = bottomPos.add(centerShift.apply(currentHeight)).add(0, currentHeight, 0);
+            System.out.println(innerPoint);
             for (int t = 0; t < 125; t++) {
                 // get radius from function, plugging in height and theta (radians)
                 double theta = (double) t / 125 * Math.TAU;
                 double radius = radiusFunction.apply(currentHeight, theta);
-                Point outerPoint = bottomPos.add(radius * Math.cos(theta), currentHeight, radius * Math.sin(theta));
-                points.addAll(line(bottomPos.add(0, currentHeight, 0), outerPoint));
+
+                System.out.println("inner: " + innerPoint);
+
+                Point outerPoint = innerPoint.add(radius * Math.cos(theta), 0, radius * Math.sin(theta));
+                System.out.println("outer: " + outerPoint);
+                if (!points.contains(outerPoint)) {
+                    points.add(new BlockVec(outerPoint.blockX(), outerPoint.blockY(), outerPoint.blockZ()));
+                    points.addAll(line(innerPoint, outerPoint));
+                }
+
 
             }
         }
         return points;
     }
+    public static Set<BlockVec> verticalTube(Point bottomPos, int height, BiFunction<Integer, Double, Double> radiusFunction) {
+        return verticalTube(bottomPos, height, radiusFunction, h -> Pos.ZERO);
+    }
 
     // Returns a set of all voxels contained on a line between two points
     public static Set<BlockVec> line(Point p1, Point p2) {
+        // 1) shift both points up 0.5 so we're shooting through block-centers vertically
+        p1 = p1.add(0, 0.5, 0);
+        p2 = p2.add(0, 0.5, 0);
+
+        // 2) get starting and ending voxel coords
+        int x     = p1.blockX(),  y     = p1.blockY(),  z     = p1.blockZ();
+        int endX  = p2.blockX(),  endY  = p2.blockY(),  endZ  = p2.blockZ();
+
         Set<BlockVec> voxels = new HashSet<>();
+        voxels.add(new BlockVec(x, y, z));
 
-        int x1 = p1.blockX(), y1 = p1.blockY(), z1 = p1.blockZ();
-        int x2 = p2.blockX(), y2 = p2.blockY(), z2 = p2.blockZ();
+        // 3) parametric deltas
+        double dx = p2.x() - p1.x();
+        double dy = p2.y() - p1.y();
+        double dz = p2.z() - p1.z();
 
-        int dx = Math.abs(x2 - x1), dy = Math.abs(y2 - y1), dz = Math.abs(z2 - z1);
-        int xs = Integer.compare(x2, x1), ys = Integer.compare(y2, y1), zs = Integer.compare(z2, z1);
+        // 4) integer step directions
+        int stepX = dx > 0 ?  1 : (dx < 0 ? -1 : 0);
+        int stepY = dy > 0 ?  1 : (dy < 0 ? -1 : 0);
+        int stepZ = dz > 0 ?  1 : (dz < 0 ? -1 : 0);
 
-        int p1x = 2 * dy - dx;
-        int p1y = 2 * dz - dy;
-        int p1z = 2 * dx - dz;
+        // 5) how far (in t) between each boundary crossing
+        final double INF = Double.POSITIVE_INFINITY;
+        double tDeltaX = dx != 0 ? 1.0/Math.abs(dx) : INF;
+        double tDeltaY = dy != 0 ? 1.0/Math.abs(dy) : INF;
+        double tDeltaZ = dz != 0 ? 1.0/Math.abs(dz) : INF;
 
-        int x = x1, y = y1, z = z1;
+        // 6) where along t∈[0,1] we hit the first X-boundary, Y-boundary, Z-boundary
+        double tMaxX = dx != 0
+                ? ((stepX > 0 ? (x + 1) - p1.x() : p1.x() - x) * tDeltaX)
+                : INF;
+        double tMaxY = dy != 0
+                ? ((stepY > 0 ? (y + 1) - p1.y() : p1.y() - y) * tDeltaY)
+                : INF;
+        double tMaxZ = dz != 0
+                ? ((stepZ > 0 ? (z + 1) - p1.z() : p1.z() - z) * tDeltaZ)
+                : INF;
 
-        int max = Math.max(dx, Math.max(dy, dz));
-
-        for (int i = 0; i <= max; i++) {
+        // 7) march!
+        while (x != endX || y != endY || z != endZ) {
+            // pick the smallest tMax — but prefer X over Y over Z on ties
+            if (tMaxX <= tMaxY && tMaxX <= tMaxZ) {
+                x += stepX;
+                tMaxX += tDeltaX;
+            } else if (tMaxY <= tMaxZ) {
+                y += stepY;
+                tMaxY += tDeltaY;
+            } else {
+                z += stepZ;
+                tMaxZ += tDeltaZ;
+            }
             voxels.add(new BlockVec(x, y, z));
-
-            if (p1x >= 0) {
-                y += ys;
-                p1x -= 2 * dx;
-            }
-            if (p1y >= 0) {
-                z += zs;
-                p1y -= 2 * dy;
-            }
-            if (p1z >= 0) {
-                x += xs;
-                p1z -= 2 * dz;
-            }
-
-            p1x += 2 * dy;
-            p1y += 2 * dz;
-            p1z += 2 * dx;
         }
-        /*
-        BlockVec[] points = new BlockVec[voxels.size()];
-        int i = 0;
-        for (BlockVec voxel : voxels) {
-            points[i] = voxel;
-            i++;
-        }
-         */
+
         return voxels;
     }
+
 
     public static double randomFromCoordinate(int seed, int x, int z) {
          long h = seed * 374761393 + x * 668265263 + z * 2246822519L;

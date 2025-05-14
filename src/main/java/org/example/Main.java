@@ -24,11 +24,13 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.UpdateViewDistancePacket;
 import org.example.TerrainGeneration.Biome.Decorators.Decorator;
+import org.example.TerrainGeneration.Biome.Decorators.TreeDecorators;
 import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
 import java.util.Random;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main {
     static BlockVec p1;
@@ -36,7 +38,7 @@ public class Main {
     static BlockVec p3;
     public static void main(String[] args) {
         // Initialization
-        System.setProperty("minestom.chunk-view-distance", "8");
+        System.setProperty("minestom.chunk-view-distance", "16");
         MinecraftServer minecraftServer = MinecraftServer.init();
 
         // Create the instance
@@ -81,11 +83,11 @@ public class Main {
                 System.out.println(point);
                 instanceContainer.setBlock(point, Block.RED_WOOL);
             }*/
-            BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
-                return 2 + 0 * Math.pow(Math.sin(2*theta + .8), 100);
-            };
-            for (Point point : PointUtils.verticalTube(p1, 1, radiusFunction)) {
-                instanceContainer.setBlock(point, Block.RED_WOOL);
+
+
+
+            for (BlockVec blockVec : TreeDecorators.largeTreeTrunk(p1, (int)(Integer.MAX_VALUE*PointUtils.randomFromCoordinate(TerrainGenerator.seed, p1.blockX(), p1.blockZ())))) {
+                instanceContainer.setBlock(blockVec, Block.OAK_LOG);
             }
         });
 

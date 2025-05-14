@@ -63,7 +63,7 @@ public class TerrainGenerator {
             }
         };
     }
-    private void initializeHeightGenerators() {
+    public void initializeHeightGenerators() {
         elevationNoises = new ArrayList<HeightGenerator>();
         HeightGenerator base = new HeightGenerator(seed, .01, noiseValue -> ((noiseValue + 1) * 10));
         elevationNoises.add(new HeightGenerator(seed, .005, noiseValue -> ((noiseValue + 1) * 5)));
