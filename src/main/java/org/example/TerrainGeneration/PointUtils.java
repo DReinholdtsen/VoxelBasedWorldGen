@@ -76,10 +76,11 @@ public class PointUtils {
     // radiusFunction represents the radius at a specific height (arg 1) and theta (arg 2)
     public static Set<BlockVec> verticalTube(Point bottomPos, int height, BiFunction<Integer, Double, Double> radiusFunction) {
         Set<BlockVec> points = new HashSet<BlockVec>();
+        bottomPos = bottomPos.add(.5, 0, .5);
         for (int currentHeight = 0; currentHeight < height; currentHeight++) {
-            for (int t = 0; t < 2500; t++) {
+            for (int t = 0; t < 125; t++) {
                 // get radius from function, plugging in height and theta (radians)
-                double theta = (double) t / 2500 * Math.TAU;
+                double theta = (double) t / 125 * Math.TAU;
                 double radius = radiusFunction.apply(currentHeight, theta);
                 Point outerPoint = bottomPos.add(radius * Math.cos(theta), currentHeight, radius * Math.sin(theta));
                 points.addAll(line(bottomPos.add(0, currentHeight, 0), outerPoint));

@@ -36,7 +36,7 @@ public class Main {
     static BlockVec p3;
     public static void main(String[] args) {
         // Initialization
-        System.setProperty("minestom.chunk-view-distance", "3");
+        System.setProperty("minestom.chunk-view-distance", "8");
         MinecraftServer minecraftServer = MinecraftServer.init();
 
         // Create the instance
@@ -82,7 +82,7 @@ public class Main {
                 instanceContainer.setBlock(point, Block.RED_WOOL);
             }*/
             BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
-                return 2 + 12 * Math.pow(Math.sin(2*theta), 10);
+                return 2 + 0 * Math.pow(Math.sin(2*theta + .8), 100);
             };
             for (Point point : PointUtils.verticalTube(p1, 1, radiusFunction)) {
                 instanceContainer.setBlock(point, Block.RED_WOOL);
