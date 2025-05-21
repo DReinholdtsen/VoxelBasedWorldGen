@@ -89,7 +89,11 @@ public class Main {
             for (BlockVec blockVec : TreeDecorators.largeTreeTrunk(p1, (int)(Integer.MAX_VALUE*PointUtils.randomFromCoordinate(TerrainGenerator.seed, p1.blockX(), p1.blockZ())))) {
                 instanceContainer.setBlock(blockVec, Block.OAK_LOG);
             }
+            for (BlockVec blockVec : TreeDecorators.leaves(p1, (int)(Integer.MAX_VALUE*PointUtils.randomFromCoordinate(TerrainGenerator.seed, p1.blockX(), p1.blockZ())))) {
+                instanceContainer.setBlock(blockVec, Block.OAK_LEAVES);
+            }
         });
+
 
         // Start the server on port 25565
         minecraftServer.start("0.0.0.0", 25565);

@@ -81,16 +81,13 @@ public class PointUtils {
         bottomPos = bottomPos.add(.5, 0, .5);
         for (int currentHeight = 0; currentHeight < height; currentHeight++) {
             Point innerPoint = bottomPos.add(centerShift.apply(currentHeight)).add(0, currentHeight, 0);
-            System.out.println(innerPoint);
             for (int t = 0; t < 125; t++) {
                 // get radius from function, plugging in height and theta (radians)
                 double theta = (double) t / 125 * Math.TAU;
                 double radius = radiusFunction.apply(currentHeight, theta);
 
-                System.out.println("inner: " + innerPoint);
-
                 Point outerPoint = innerPoint.add(radius * Math.cos(theta), 0, radius * Math.sin(theta));
-                System.out.println("outer: " + outerPoint);
+
                 if (!points.contains(outerPoint)) {
                     points.add(new BlockVec(outerPoint.blockX(), outerPoint.blockY(), outerPoint.blockZ()));
                     points.addAll(line(innerPoint, outerPoint));

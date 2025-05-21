@@ -13,6 +13,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static org.example.TerrainGeneration.PointUtils.rectangularPrism;
+
 public class TreeDecorators {
 /*
     public static Consumer<Block.Setter> largeTreeSetter(Point decorationPos, int seed) {
@@ -48,27 +50,19 @@ public class TreeDecorators {
             }
         };
     }*/
+
+
     public static Set<BlockVec> largeTreeTrunk(Point decorationPos, int seed) {
         BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
-            return Math.pow(1.4, -height)*2.2 + .8;
+            return Math.pow(1.4, -height)*2.2 + .6;
         };
-        double startAngle = 2 * Math.PI * PointUtils.randomFromCoordinate(-16, decorationPos.blockX(), decorationPos.blockZ());
-        Function<Integer, Point> centerShift = x -> {
-            double random = PointUtils.randomFromCoordinate(x, decorationPos.blockX(), decorationPos.blockZ());
-            Point shift = new Pos(1.2*Math.sin(startAngle + x/5d+ random), 0, Math.sin(startAngle + x/5d + random)*1.2);
-            return shift;
-        };
+
+        Function<Integer, Point> centerShift = x -> centerShift(decorationPos, seed, x);
 
         Set<BlockVec> points = PointUtils.verticalTube(decorationPos, 25, radiusFunction, centerShift);
         Set<BlockVec> newPoints = new HashSet<BlockVec>();
         for (int i = 0; i < 6; i++) {
-            BlockVec startBlock = randomFromSet(points);
-
-            Point shift1 = new Pos((PointUtils.randomFromCoordinate(-11 + i * 24798, decorationPos.blockX(), decorationPos.blockZ()) - .5) * 50,  (PointUtils.randomFromCoordinate(-14 + i * 24798, decorationPos.blockX(), decorationPos.blockZ()) - .5) * 50, (PointUtils.randomFromCoordinate(-18 + i * 24798, decorationPos.blockX(), decorationPos.blockZ()) -.5) * 50);
-            Point shift2 = new Pos((PointUtils.randomFromCoordinate(-10 + i * 24798, decorationPos.blockX(), decorationPos.blockZ()) -.5) * 50,  (PointUtils.randomFromCoordinate(-9 + i * 24798, decorationPos.blockX(), decorationPos.blockZ()) - .5) * 50, (PointUtils.randomFromCoordinate(-8 + i * 24798, decorationPos.blockX(), decorationPos.blockZ()) - .5) * 50);
-            for (Point branchPoint: PointUtils.bezierCurve(startBlock, startBlock.add(shift1), startBlock.add(shift2), t -> 1.5d)) {
-                newPoints.add(new BlockVec(branchPoint));
-            }
+            newPoints.addAll(generateBranch(decorationPos, seed, i));
         }
         points.addAll(newPoints);
         return points;
@@ -89,5 +83,49 @@ public class TreeDecorators {
         }
         return null;
     }
+    public static Set<BlockVec> generateBranch(Point decorationPos, int seed, int n) {
+        int height = 25; // hard coded height
+        int branchHeight = (int)(17 + 8 * PointUtils.randomFromCoordinate(seed * 4 + n >> 2, decorationPos.blockX(), decorationPos.blockZ()));
+        Point startBlock = decorationPos.add(0, branchHeight, 0).add(centerShift(decorationPos, seed, branchHeight));
+        //double theta = 2 * Math.PI * PointUtils.randomFromCoordinate(-35 + n + seed * 3, decorationPos.blockX(), decorationPos.blockZ());
+        double theta = 2 * Math.PI * n / 6 + PointUtils.randomFromCoordinate(-37 + n * 5 + seed * 2, decorationPos.blockX(), decorationPos.blockZ());
+        double length = 10 * (1 + PointUtils.randomFromCoordinate(-1398 + n + seed * 3, decorationPos.blockX(), decorationPos.blockZ()));
+        Point shiftVector = new Pos(length * Math.cos(theta), 0, length * Math.sin(theta));
 
+        Point shift1 = new Pos((PointUtils.randomFromCoordinate(-11 + n * 24798 + seed, decorationPos.blockX(), decorationPos.blockZ()) - .5),  (PointUtils.randomFromCoordinate(-14 + n * 24798 + seed, decorationPos.blockX(), decorationPos.blockZ()) - .5), (PointUtils.randomFromCoordinate(-18 + n * 24798 + seed, decorationPos.blockX(), decorationPos.blockZ()) -.5)).mul(4);
+        Set<BlockVec> set = new HashSet<>();
+        for (Point point : PointUtils.bezierCurve(startBlock, startBlock.add(shiftVector.mul(.5)).add(shift1.mul(5)), startBlock.add(shiftVector), t -> .6d)) {
+            set.add(new BlockVec(point));
+        }
+        return set;
+    }
+
+    public static Point centerShift(Point decorationPos, int seed, int n) {
+        double random = PointUtils.randomFromCoordinate(seed * 3 + n >> 2, decorationPos.blockX(), decorationPos.blockZ());
+        double startAngle = 2 * Math.PI * PointUtils.randomFromCoordinate(-16, decorationPos.blockX(), decorationPos.blockZ());
+        Point shift = new Pos(1.2*Math.cos(startAngle + n/5d+ random), 0, Math.sin(startAngle + n/5d + random)*1.2);
+
+        return shift;
+    }
+
+    public static Set<BlockVec> leaves(Point decorationPos, int seed) {
+        Set<BlockVec> points = new HashSet<>();
+        for (int i = 0; i < 6; i++) {
+            Set<BlockVec> branch = generateBranch(decorationPos, seed, i);
+            for (BlockVec point : branch) {
+                int radius = 3;
+                BlockVec cubeOffset = new BlockVec((int) radius + 1, (int) radius + 1, (int) radius + 1);
+                double radiusSquared = Math.pow(radius, 2);
+                for (BlockVec pointInCube : rectangularPrism(point.add(cubeOffset), point.sub(cubeOffset))) {
+                    Point difference = pointInCube.sub(point);
+                    double distanceSquared = difference.distanceSquared(Pos.ZERO);
+                    if (distanceSquared <= radiusSquared) {
+                        // point within distance from curve
+                        points.add(pointInCube);
+                    }
+                }
+            }
+        }
+        return points;
+    }
 }
