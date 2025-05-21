@@ -174,4 +174,23 @@ public class PointUtils {
     public static Function<Point, Double> L_P_norm(int p) {
         return point -> Math.pow(Math.abs(Math.pow(point.x(), p)) + Math.abs(Math.pow(point.y(), p)) + Math.abs(Math.pow(point.z(), p)), 1d/p);
     }
+
+    // creates ellipsoid centered at point with given "radii" along each axis
+    public static Set<BlockVec> ellipsoid(Point center, Point stretch) {
+        Set<BlockVec> points = new HashSet<>();
+        BlockVec cubeOffset = new BlockVec(stretch.x(), stretch.z(), stretch.z());
+        for (BlockVec pointInArea : rectangularPrism(center.add(cubeOffset), center.sub(cubeOffset))) {
+            Point difference = center.sub(pointInArea);
+            Point adjustedOffset = new Pos(difference.x()/stretch.x(), difference.y()/stretch.y(), difference.z()/stretch.z());
+            if (adjustedOffset.distanceSquared(Pos.ZERO) < 1) {
+                points.add(pointInArea);
+            }
+        }
+        return points;
+    }
+
+    // creates sphere centered at point with given radius
+    public static Set<BlockVec> sphere(Point center, double radius) {
+        return ellipsoid(center, new Pos(radius, radius, radius));
+    }
 }

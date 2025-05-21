@@ -19,7 +19,9 @@ public class ForestDecorator implements Decorator {
             // generate random height tree from 4 to 6
             if (Decorator.validTreeLocation(decorationPos.blockX(), decorationPos.blockZ())) {
                 // check for collisions
-                unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
+                unit.fork(Decorator.structureToSetter(TreeDecorators.generateTree(decorationPos, TerrainGenerator.seed), decorationPos));
+
+                //unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
             }
 
 

@@ -24,6 +24,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.UpdateViewDistancePacket;
 import org.example.TerrainGeneration.Biome.Decorators.Decorator;
+import org.example.TerrainGeneration.Biome.Decorators.Structure;
 import org.example.TerrainGeneration.Biome.Decorators.TreeDecorators;
 import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
@@ -79,19 +80,14 @@ public class Main {
         });
         globalEventHandler.addListener(PlayerChatEvent.class, event -> {
             /*
-            for (Point point : PointUtils.bezierCurve(p1, p2, p3)) {
+            for (Point point : PointUtils.ellipsoid(p1, new Pos(5, 5, 5))) {
                 System.out.println(point);
                 instanceContainer.setBlock(point, Block.RED_WOOL);
-            }*/
+            } */
 
+            Structure tree = TreeDecorators.generateTree(p1, TerrainGenerator.seed);
+            tree.paste(instanceContainer, p1);
 
-
-            for (BlockVec blockVec : TreeDecorators.largeTreeTrunk(p1, (int)(Integer.MAX_VALUE*PointUtils.randomFromCoordinate(TerrainGenerator.seed, p1.blockX(), p1.blockZ())))) {
-                instanceContainer.setBlock(blockVec, Block.OAK_LOG);
-            }
-            for (BlockVec blockVec : TreeDecorators.leaves(p1, (int)(Integer.MAX_VALUE*PointUtils.randomFromCoordinate(TerrainGenerator.seed, p1.blockX(), p1.blockZ())))) {
-                instanceContainer.setBlock(blockVec, Block.OAK_LEAVES);
-            }
         });
 
 

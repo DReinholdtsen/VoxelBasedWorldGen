@@ -20,7 +20,8 @@ public class PlainsDecorator implements Decorator {
             // check for no tree collisions
             // generate random height tree from 4 to 6
             if (Decorator.validTreeLocation(decorationPos.blockX(), decorationPos.blockZ())) {
-                unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
+                unit.fork(Decorator.structureToSetter(TreeDecorators.generateTree(decorationPos, TerrainGenerator.seed), decorationPos));
+                //unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
             }
         }
         if (randomVal < .03) {

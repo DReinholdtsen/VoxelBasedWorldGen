@@ -11,6 +11,7 @@ import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -19,6 +20,17 @@ import java.util.function.Function;
 public interface Decorator {
     public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight);
 
+    public static Consumer<Block.Setter> structureToSetter(Structure structure, Point decorationPos) {
+        return setter -> {
+            Map<Block, Set<BlockVec>> blockSetMap = structure.getBlockMap();
+            for (Block block : blockSetMap.keySet()) {
+                Set<BlockVec> points = blockSetMap.get(block);
+                for (Point point : points) {
+                    setter.setBlock(decorationPos.add(point), block);
+                }
+            }
+        };
+    }
     public static Consumer<Block.Setter> createTreeSetter(Point decorationPos, int height) {
         return setter -> {
 

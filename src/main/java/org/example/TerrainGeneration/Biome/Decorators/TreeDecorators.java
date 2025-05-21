@@ -16,55 +16,46 @@ import java.util.function.Function;
 import static org.example.TerrainGeneration.PointUtils.rectangularPrism;
 
 public class TreeDecorators {
-/*
-    public static Consumer<Block.Setter> largeTreeSetter(Point decorationPos, int seed) {
 
-        return setter -> {
-
-            for (int y = 0; y < height; y++) {
-                setter.setBlock(decorationPos.add(0, y, 0), Block.OAK_LOG);
-            }
-            for (int x = -2; x <= 2; x++) {
-                // x coordinate for leaves relative to trunk
-                for (int z = -2; z <= 2; z++) {
-                    // same thing
-                    // check to make sure not overriding trunk
-                    int startHeight = height - 3;
-                    int maxHeight = height + 1;
-                    if (Math.abs(x) == 2 && Math.abs(z) == 2) {
-                        // no corners
-                        continue;
-                    }
-                    if (x == 0 && z == 0) {
-                        startHeight = height;
-                        maxHeight += 1;
-                    }
-                    if (Math.abs(x) == 2 || Math.abs(z) == 2) {
-                        maxHeight -= 1;
-                    }
-                    for (int y = startHeight; y < maxHeight; y++) {
-                        setter.setBlock(decorationPos.add(x, y, z), Block.OAK_LEAVES);
-                    }
-
+    public static Structure generateTree(Point decorationPos, int seed) {
+        Structure tree = new Structure();
+        for (BlockVec point : largeTreeTrunk(decorationPos, seed)) {
+            tree.addBlock(point, Block.OAK_LOG);
+        }
+        for (int i = 0; i < 6; i++) {
+            // generate branches, i represents n value
+            Set<BlockVec> branch = generateBranch(decorationPos, seed, i);
+            int k = 0;
+            // add logs and leaves surrounding
+            for (BlockVec point : generateBranch(decorationPos, seed, i)) {
+                tree.addBlock(point, Block.OAK_LOG);
+                if (k % 3 == 0) {
+                    tree.addBlocks(PointUtils.ellipsoid(point, new Pos(3.5, 2, 3.5)), Block.OAK_LEAVES);
                 }
+                k++;
             }
-        };
-    }*/
-
+        }
+        // generate leaf clusters
+        // area for valid leaf clusters
+        Set<BlockVec> area = PointUtils.ellipsoid(new Pos(0, 23, 0), new Pos(9, 3, 9));
+        for (int i = 0; i < 20; i++) {
+            // amount of generated leaf clusters
+            // 25 = height
+            Point point = randomFromSet(area);
+            Point size = new Pos(6 * PointUtils.randomFromCoordinate(seed * 17 + i * 91, decorationPos.blockX(), decorationPos.blockZ()) + 2, 3 * PointUtils.randomFromCoordinate(seed * 17 + i * 92, decorationPos.blockX(), decorationPos.blockZ()) + 1, 6 * PointUtils.randomFromCoordinate(seed * 17 + i * 93, decorationPos.blockX(), decorationPos.blockZ()) + 2);
+            tree.addBlocks(PointUtils.ellipsoid(point, size), Block.OAK_LEAVES);
+        }
+        return tree;
+    }
 
     public static Set<BlockVec> largeTreeTrunk(Point decorationPos, int seed) {
         BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
-            return Math.pow(1.4, -height)*2.2 + .6;
+            return Math.pow(1.4, -(height))*2.2 + .6;
         };
 
         Function<Integer, Point> centerShift = x -> centerShift(decorationPos, seed, x);
 
-        Set<BlockVec> points = PointUtils.verticalTube(decorationPos, 25, radiusFunction, centerShift);
-        Set<BlockVec> newPoints = new HashSet<BlockVec>();
-        for (int i = 0; i < 6; i++) {
-            newPoints.addAll(generateBranch(decorationPos, seed, i));
-        }
-        points.addAll(newPoints);
+        Set<BlockVec> points = PointUtils.verticalTube(new Pos(0, -2, 0), 27, radiusFunction, centerShift);
         return points;
 
 
@@ -86,7 +77,7 @@ public class TreeDecorators {
     public static Set<BlockVec> generateBranch(Point decorationPos, int seed, int n) {
         int height = 25; // hard coded height
         int branchHeight = (int)(17 + 8 * PointUtils.randomFromCoordinate(seed * 4 + n >> 2, decorationPos.blockX(), decorationPos.blockZ()));
-        Point startBlock = decorationPos.add(0, branchHeight, 0).add(centerShift(decorationPos, seed, branchHeight));
+        Point startBlock = new Pos(0, branchHeight, 0).add(centerShift(decorationPos, seed, branchHeight));
         //double theta = 2 * Math.PI * PointUtils.randomFromCoordinate(-35 + n + seed * 3, decorationPos.blockX(), decorationPos.blockZ());
         double theta = 2 * Math.PI * n / 6 + PointUtils.randomFromCoordinate(-37 + n * 5 + seed * 2, decorationPos.blockX(), decorationPos.blockZ());
         double length = 10 * (1 + PointUtils.randomFromCoordinate(-1398 + n + seed * 3, decorationPos.blockX(), decorationPos.blockZ()));
@@ -113,16 +104,8 @@ public class TreeDecorators {
         for (int i = 0; i < 6; i++) {
             Set<BlockVec> branch = generateBranch(decorationPos, seed, i);
             for (BlockVec point : branch) {
-                int radius = 3;
-                BlockVec cubeOffset = new BlockVec((int) radius + 1, (int) radius + 1, (int) radius + 1);
-                double radiusSquared = Math.pow(radius, 2);
-                for (BlockVec pointInCube : rectangularPrism(point.add(cubeOffset), point.sub(cubeOffset))) {
-                    Point difference = pointInCube.sub(point);
-                    double distanceSquared = difference.distanceSquared(Pos.ZERO);
-                    if (distanceSquared <= radiusSquared) {
-                        // point within distance from curve
-                        points.add(pointInCube);
-                    }
+                for (BlockVec pointInSphere : PointUtils.sphere(point, 3)) {
+                    points.add(pointInSphere);
                 }
             }
         }
