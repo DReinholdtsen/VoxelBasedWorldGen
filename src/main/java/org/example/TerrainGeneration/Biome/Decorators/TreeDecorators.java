@@ -16,11 +16,12 @@ import java.util.function.Function;
 import static org.example.TerrainGeneration.PointUtils.rectangularPrism;
 
 public class TreeDecorators {
-
+    private static final Block logBlock = Block.DARK_OAK_WOOD;
+    private static final Block leafBlock = Block.DARK_OAK_LEAVES;
     public static Structure generateTree(Point decorationPos, int seed) {
         Structure tree = new Structure();
         for (BlockVec point : largeTreeTrunk(decorationPos, seed)) {
-            tree.addBlock(point, Block.OAK_LOG);
+            tree.addBlock(point, logBlock);
         }
         for (int i = 0; i < 6; i++) {
             // generate branches, i represents n value
@@ -28,9 +29,9 @@ public class TreeDecorators {
             int k = 0;
             // add logs and leaves surrounding
             for (BlockVec point : generateBranch(decorationPos, seed, i)) {
-                tree.addBlock(point, Block.OAK_LOG);
+                tree.addBlock(point, logBlock);
                 if (k % 3 == 0) {
-                    tree.addBlocks(PointUtils.ellipsoid(point, new Pos(3.5, 2, 3.5)), Block.OAK_LEAVES);
+                    tree.addBlocks(PointUtils.ellipsoid(point, new Pos(3.5, 2, 3.5)), leafBlock);
                 }
                 k++;
             }
@@ -43,7 +44,7 @@ public class TreeDecorators {
             // 25 = height
             Point point = randomFromSet(area);
             Point size = new Pos(6 * PointUtils.randomFromCoordinate(seed * 17 + i * 91, decorationPos.blockX(), decorationPos.blockZ()) + 2, 3 * PointUtils.randomFromCoordinate(seed * 17 + i * 92, decorationPos.blockX(), decorationPos.blockZ()) + 1, 6 * PointUtils.randomFromCoordinate(seed * 17 + i * 93, decorationPos.blockX(), decorationPos.blockZ()) + 2);
-            tree.addBlocks(PointUtils.ellipsoid(point, size), Block.OAK_LEAVES);
+            tree.addBlocks(PointUtils.ellipsoid(point, size), leafBlock);
         }
         return tree;
     }
@@ -99,16 +100,5 @@ public class TreeDecorators {
         return shift;
     }
 
-    public static Set<BlockVec> leaves(Point decorationPos, int seed) {
-        Set<BlockVec> points = new HashSet<>();
-        for (int i = 0; i < 6; i++) {
-            Set<BlockVec> branch = generateBranch(decorationPos, seed, i);
-            for (BlockVec point : branch) {
-                for (BlockVec pointInSphere : PointUtils.sphere(point, 3)) {
-                    points.add(pointInSphere);
-                }
-            }
-        }
-        return points;
-    }
+    
 }

@@ -25,6 +25,7 @@ public class TerrainGenerator {
     private ArrayList<HeightGenerator> elevationNoises;
     private Generator generator;
     public static BiomeGenerator biomeGenerator;
+    public static HeightGenerator hilliness;
     // Initialize a TerrainGenerator object using a seed
     public TerrainGenerator(int seed) {
         // Initializes variables and creates primary noise source for terrain
@@ -33,6 +34,7 @@ public class TerrainGenerator {
         initializeHeightGenerators();
         // creates biome generator
         this.biomeGenerator = new BiomeGenerator(seed * seed);
+        hilliness = hillinessGenerator();
         this.generator = unit -> {
             Point start = unit.absoluteStart();
             Point size = unit.size();
@@ -42,12 +44,28 @@ public class TerrainGenerator {
                     Heightmap unitHeightmap = new Heightmap(size.blockX(), size.blockZ());
                     Point bottom = start.add(x, 0, z);
                     double doubleHeight = 0;
+                    double hillinessValue = hilliness.getHeight(bottom.blockX(), bottom.blockZ());
                     // adds height from all generators
+
                     for (HeightGenerator heightGenerator : elevationNoises) {
-                        doubleHeight += heightGenerator.getHeight(bottom.blockX(), bottom.blockZ());
+                        double stepHeight = heightGenerator.getHeight(bottom.blockX(), bottom.blockZ());
+                        doubleHeight += stepHeight;
                     }
+                    doubleHeight *= hillinessValue;
                     int height = (int) doubleHeight;
+                    height += 60;
                     Biome biome = biomeGenerator.getBiome(bottom.blockX(), bottom.blockZ());
+                    if (height < 60) {
+                        if (biome.getSurfaceBlock() == Block.SNOW_BLOCK) {
+                            // frozen lake
+                            biome = biomeGenerator.IDtoBiome.get(Biomes.FROZEN_LAKE);
+                        } else {
+                            biome = biomeGenerator.IDtoBiome.get(Biomes.LAKE);
+                        }
+
+
+                    }
+
                     // limit height to max height of unit
                     // set in game biome
                     height = Math.min(height, size.blockY() - start.blockY());
@@ -66,18 +84,21 @@ public class TerrainGenerator {
     public void initializeHeightGenerators() {
         elevationNoises = new ArrayList<HeightGenerator>();
         HeightGenerator base = new HeightGenerator(seed, .01, noiseValue -> ((noiseValue + 1) * 10));
-        elevationNoises.add(new HeightGenerator(seed, .005, noiseValue -> ((noiseValue + 1) * 5)));
-        elevationNoises.add(new HeightGenerator(seed, .0025, noiseValue -> ((noiseValue + 1) * 2.5)));
-        elevationNoises.add(new HeightGenerator(seed, .00125, noiseValue -> ((noiseValue + 1) * 1.25)));
-        elevationNoises.add(new HeightGenerator(seed, .0006, noiseValue -> ((noiseValue + 1) * .6)));
-        elevationNoises.add(new HeightGenerator(seed, .0003, noiseValue -> ((noiseValue + 1) * .3)));
+        elevationNoises.add(new HeightGenerator(seed + 1, .005, noiseValue -> ((noiseValue + 1) * 5)));
+        elevationNoises.add(new HeightGenerator(seed + 2, .0025, noiseValue -> ((noiseValue + 1) * 2.5)));
+        elevationNoises.add(new HeightGenerator(seed + 3, .00125, noiseValue -> ((noiseValue + 1) * 1.25)));
+        elevationNoises.add(new HeightGenerator(seed + 4, .0006, noiseValue -> ((noiseValue + 1) * .6)));
+        elevationNoises.add(new HeightGenerator(seed + 5, .0003, noiseValue -> ((noiseValue + 1) * .3)));
 
+        elevationNoises.add(new HeightGenerator(seed + 7, .01, noiseValue -> -noiseValue * 6));
 
         HeightGenerator smallHills = smallHillsGenerator();
         HeightGenerator mountains = mountainsGenerator();
+        HeightGenerator negativeGenerator = negativeGenerator();
         elevationNoises.add(base);
         elevationNoises.add(smallHills);
         elevationNoises.add(mountains);
+        elevationNoises.add(negativeGenerator);
     }
 
     public Generator getGenerator() {
@@ -114,6 +135,30 @@ public class TerrainGenerator {
         });
     }
 
+    // creates negative height generator for valleys and lakes specifically
+    public HeightGenerator negativeGenerator() {
+        return new HeightGenerator(seed+192, .003, noiseValue -> {
+            // creates a threshhold of above .9 (1/20)
+            double val = Math.max(0, (noiseValue + 1) / 2d - .6);
+            // if value is 0 or close, ignore
+            if (val <= .00000001) {
+                return 0d;
+            }
+            val = Math.pow(val, 1.6);
+            val = val * -250;
+            if (val < 0) {
+                //System.out.println(val);
+            }
+            return val;
+        });
+    }
+
+    // creates a "height" generator that returns a value from .5 to 1 representing the hilliness of a region
+    public HeightGenerator hillinessGenerator() {
+        return new HeightGenerator(seed + 193, .00008, noiseValue -> {
+            return Math.pow(noiseValue + 1 / 2d, 3) * .75 + .75;
+        });
+    }
     // returns the seed of the given world
     public int getSeed() {
         return seed;

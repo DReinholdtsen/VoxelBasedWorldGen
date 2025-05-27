@@ -3,10 +3,7 @@ package org.example.TerrainGeneration.Biome;
 import de.articdive.jnoise.pipeline.JNoise;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.block.Block;
-import org.example.TerrainGeneration.Biome.Decorators.DesertDecorator;
-import org.example.TerrainGeneration.Biome.Decorators.EmptyDecorator;
-import org.example.TerrainGeneration.Biome.Decorators.ForestDecorator;
-import org.example.TerrainGeneration.Biome.Decorators.PlainsDecorator;
+import org.example.TerrainGeneration.Biome.Decorators.*;
 import org.example.TerrainGeneration.NoiseUtils;
 
 import java.util.ArrayList;
@@ -21,8 +18,8 @@ public class BiomeGenerator {
     JNoise rainfall;
     JNoise ruggedness;
 
-    // TODO: Put all biomes into json format and read from file
-    Map<Integer, Biome> IDtoBiome;
+
+    public Map<Integer, Biome> IDtoBiome;
 
     // initializes biome generator using a specific seed
     public BiomeGenerator(int seed) {
@@ -47,6 +44,8 @@ public class BiomeGenerator {
         IDtoBiome.put(Biomes.TAIGA, new Biome(Block.CYAN_WOOL, new EmptyDecorator(), net.minestom.server.world.biome.Biome.TAIGA));
         IDtoBiome.put(Biomes.SNOWY_TUNDRA, new Biome(Block.SNOW_BLOCK, new EmptyDecorator(), net.minestom.server.world.biome.Biome.SNOWY_TAIGA));
         IDtoBiome.put(Biomes.HILLY_DESERT, new Biome(Block.SAND, new EmptyDecorator(), net.minestom.server.world.biome.Biome.DESERT));
+        IDtoBiome.put(Biomes.LAKE, new Biome(Block.GRAVEL, new WaterDecorator(), net.minestom.server.world.biome.Biome.OCEAN));
+        IDtoBiome.put(Biomes.FROZEN_LAKE, new Biome(Block.GRAVEL, new FrozenLakeDecorator(), net.minestom.server.world.biome.Biome.FROZEN_OCEAN));
     }
     // gets the biome object corresponding to a specific coordinate
     public Biome getBiome(int x, int z) {

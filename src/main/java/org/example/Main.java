@@ -23,6 +23,8 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.UpdateViewDistancePacket;
+import net.minestom.server.potion.Potion;
+import net.minestom.server.potion.PotionEffect;
 import org.example.TerrainGeneration.Biome.Decorators.Decorator;
 import org.example.TerrainGeneration.Biome.Decorators.Structure;
 import org.example.TerrainGeneration.Biome.Decorators.TreeDecorators;
@@ -59,6 +61,7 @@ public class Main {
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
             player.setGameMode(GameMode.CREATIVE);
+            player.addEffect(new Potion(PotionEffect.NIGHT_VISION, 1, 10000));
             player.sendPacket(new UpdateViewDistancePacket(32));
             player.setFlyingSpeed(1);
             player.getInventory().addItemStack(ItemStack.of(Material.WHITE_WOOL));
@@ -79,14 +82,27 @@ public class Main {
             }
         });
         globalEventHandler.addListener(PlayerChatEvent.class, event -> {
+            String message = event.getRawMessage();
+            try {
+                int newSeed = Integer.parseInt(message);
+                TerrainGenerator.seed = newSeed;
+                Player player = event.getPlayer();
+                InstanceContainer newInstance = instanceManager.createInstanceContainer();
+                newInstance.setGenerator(new TerrainGenerator(newSeed).getGenerator());
+                player.setInstance(newInstance);
+                return;
+            } catch (Exception e) {
+
+            }
             /*
             for (Point point : PointUtils.ellipsoid(p1, new Pos(5, 5, 5))) {
                 System.out.println(point);
                 instanceContainer.setBlock(point, Block.RED_WOOL);
             } */
-
-            Structure tree = TreeDecorators.generateTree(p1, TerrainGenerator.seed);
-            tree.paste(instanceContainer, p1);
+            Point playerPos = event.getPlayer().getPosition();
+            event.getPlayer().sendMessage(Double.toString(TerrainGenerator.hilliness.getHeight(playerPos.blockX(), playerPos.blockZ())));
+            //Structure tree = TreeDecorators.generateTree(p1, TerrainGenerator.seed);
+            //tree.paste(instanceContainer, p1);
 
         });
 

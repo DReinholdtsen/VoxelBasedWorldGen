@@ -10,4 +10,6 @@ public enum Biomes {;
     public static final int MOUNTAINS = 6;
     public static final int SNOWY_PEAKS = 7;
     public static final int SAVANNAH = 8;
+    public static final int LAKE = 9;
+    public static final int FROZEN_LAKE = 10;
 }
