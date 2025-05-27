@@ -13,10 +13,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.instance.*;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.coordinate.Point;
@@ -68,6 +65,7 @@ public class Main {
             player.getInventory().addItemStack(ItemStack.of(Material.GRAY_WOOL));
             player.getInventory().addItemStack(ItemStack.of(Material.BLACK_WOOL));
             player.getInventory().addItemStack(ItemStack.of(Material.OAK_LOG));
+
         });
 
         globalEventHandler.addListener(PlayerBlockPlaceEvent.class, event -> {
@@ -105,6 +103,8 @@ public class Main {
             //tree.paste(instanceContainer, p1);
 
         });
+
+
 
 
         // Start the server on port 25565

@@ -81,6 +81,10 @@ public interface Decorator {
                     if (value < ((PlainsDecorator) decorator).treeThreshold) {
                         return false;
                     }
+                } else if (decorator instanceof TaigaDecorator) {
+                    if (value < ((TaigaDecorator) decorator).treeThreshold) {
+                        return false;
+                    }
                 } else if (decorator instanceof ForestDecorator) {
                     if (value < ((ForestDecorator) decorator).treeThreshold) {
                         return false;

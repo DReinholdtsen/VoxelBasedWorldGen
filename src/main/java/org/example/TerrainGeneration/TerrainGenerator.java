@@ -26,6 +26,7 @@ public class TerrainGenerator {
     private Generator generator;
     public static BiomeGenerator biomeGenerator;
     public static HeightGenerator hilliness;
+    public static JNoise caveNoise;
     // Initialize a TerrainGenerator object using a seed
     public TerrainGenerator(int seed) {
         // Initializes variables and creates primary noise source for terrain
@@ -33,7 +34,8 @@ public class TerrainGenerator {
         // initializes all height generators
         initializeHeightGenerators();
         // creates biome generator
-        this.biomeGenerator = new BiomeGenerator(seed * seed);
+        biomeGenerator = new BiomeGenerator(seed * seed);
+        caveNoise = NoiseUtils.createNoise(seed * 5 + 17985, .025);
         hilliness = hillinessGenerator();
         this.generator = unit -> {
             Point start = unit.absoluteStart();
@@ -56,7 +58,7 @@ public class TerrainGenerator {
                     height += 60;
                     Biome biome = biomeGenerator.getBiome(bottom.blockX(), bottom.blockZ());
                     if (height < 60) {
-                        if (biome.getSurfaceBlock() == Block.SNOW_BLOCK) {
+                        if (biome.getSurfaceBlock() == Block.SNOW_BLOCK || biome.getBiomeKey() == net.minestom.server.world.biome.Biome.SNOWY_TAIGA) {
                             // frozen lake
                             biome = biomeGenerator.IDtoBiome.get(Biomes.FROZEN_LAKE);
                         } else {
@@ -70,13 +72,32 @@ public class TerrainGenerator {
                     // set in game biome
                     height = Math.min(height, size.blockY() - start.blockY());
 
+                    // set blocks, including cave air blocks
+                    int highestRealHeight = 0;
+                    for (int currentHeight = 0; currentHeight < height; currentHeight++) {
+                        // find cave noise result at current location, determine if it should be air
+                        double caveNoiseResult = caveNoise.evaluateNoise(bottom.blockX(), currentHeight, bottom.blockZ());
+                        // otherwise set it to appropriate block
+                        if (caveNoiseResult < .4 + currentHeight / 240d) {
+                            unit.modifier().setBlock(bottom.add(0, currentHeight, 0), biome.getSurfaceBlock());
+                            highestRealHeight = currentHeight;
+                        } else {
+                            //System.out.println(caveNoiseResult);
+                        }
+                    }
 
-                    unit.modifier().fill(bottom, bottom.add(1, height, 1), biome.getSurfaceBlock());
-                    for (int currentHeight = 0; currentHeight <= height; currentHeight++) {
+                    // set biome
+                    for (int currentHeight = 0; currentHeight <= height + 2; currentHeight++) {
+
                         unit.modifier().setBiome(bottom.add(0, currentHeight, 0), biome.getBiomeKey());
                     }
-                    unitHeightmap.setHeight(x, z, height);
-                    biome.addDecoration(unit, x, z, height);
+                    if (highestRealHeight > 0) {
+                        biome.addDecoration(unit, x, z, highestRealHeight + 1);
+                    }
+                    else {
+                        biome.addDecoration(unit, x, z, 1);
+                    }
+
                 }
             }
         };

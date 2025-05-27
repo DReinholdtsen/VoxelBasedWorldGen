@@ -18,6 +18,8 @@ import static org.example.TerrainGeneration.PointUtils.rectangularPrism;
 public class TreeDecorators {
     private static final Block logBlock = Block.DARK_OAK_WOOD;
     private static final Block leafBlock = Block.DARK_OAK_LEAVES;
+
+    // generates the large dark oak trees in forests and plains
     public static Structure generateTree(Point decorationPos, int seed) {
         Structure tree = new Structure();
         for (BlockVec point : largeTreeTrunk(decorationPos, seed)) {
@@ -48,6 +50,15 @@ public class TreeDecorators {
         }
         return tree;
     }
+    // generates the large spruce trees in taigas
+    public static Structure generateSpruceTree(Point decorationPos, int seed) {
+        Structure tree = new Structure();
+        for (BlockVec point : spruceTreeTrunk(decorationPos, seed)) {
+            tree.addBlock(point, Block.SPRUCE_WOOD);
+        }
+        return tree;
+    }
+
 
     public static Set<BlockVec> largeTreeTrunk(Point decorationPos, int seed) {
         BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
@@ -57,6 +68,21 @@ public class TreeDecorators {
         Function<Integer, Point> centerShift = x -> centerShift(decorationPos, seed, x);
 
         Set<BlockVec> points = PointUtils.verticalTube(new Pos(0, -2, 0), 27, radiusFunction, centerShift);
+        return points;
+
+
+
+    }
+
+    // returns set of block positions of spruce tree trunk
+    public static Set<BlockVec> spruceTreeTrunk(Point decorationPos, int seed) {
+        BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
+            return Math.pow(1.4, -(height))*2.2 + 1;
+        };
+        int height = 30 + (int) (PointUtils.randomFromCoordinate(seed + 173, decorationPos.blockX(), decorationPos.blockZ()) * 10);
+        Function<Integer, Point> centerShift = n -> spruceCenterShift(decorationPos, seed, n);
+
+        Set<BlockVec> points = PointUtils.verticalTube(new Pos(0, -2, 0), height, radiusFunction, centerShift);
         return points;
 
 
@@ -99,6 +125,12 @@ public class TreeDecorators {
 
         return shift;
     }
+    public static Point spruceCenterShift(Point decorationPos, int seed, int n) {
+        double random = PointUtils.randomFromCoordinate(seed * 3 + n >> 2, decorationPos.blockX(), decorationPos.blockZ());
+        double startAngle = 2 * Math.PI * PointUtils.randomFromCoordinate(-16, decorationPos.blockX(), decorationPos.blockZ());
+        Point leanDirection = new Pos(Math.cos(startAngle), 0, Math.sin(startAngle));
+        Point shift = new Pos(.4*Math.cos(startAngle + n/5d+ random), 0, Math.sin(startAngle + n/5d + random)*.4).add(leanDirection.mul(n / 8d));
 
-    
+        return shift;
+    }
 }
