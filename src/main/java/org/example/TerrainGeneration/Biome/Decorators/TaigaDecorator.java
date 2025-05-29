@@ -1,6 +1,7 @@
 package org.example.TerrainGeneration.Biome.Decorators;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
@@ -20,7 +21,9 @@ public class TaigaDecorator implements Decorator {
                 //unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
             }
 
-
+        }
+        else if (randomVal < .85) {
+            unit.modifier().setBlock(decorationPos, Block.SNOW);
         }
 
     }

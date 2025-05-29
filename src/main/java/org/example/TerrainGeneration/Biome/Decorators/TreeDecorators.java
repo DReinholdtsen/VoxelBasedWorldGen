@@ -53,8 +53,14 @@ public class TreeDecorators {
     // generates the large spruce trees in taigas
     public static Structure generateSpruceTree(Point decorationPos, int seed) {
         Structure tree = new Structure();
-        for (BlockVec point : spruceTreeTrunk(decorationPos, seed)) {
+        Function<Integer, Point> centerShift = n -> spruceCenterShift(decorationPos, seed, n);
+        int height = 30 + (int) (PointUtils.randomFromCoordinate(seed + 173, decorationPos.blockX(), decorationPos.blockZ()) * 10);
+        for (BlockVec point : spruceTreeTrunk(decorationPos, seed, centerShift, height)) {
             tree.addBlock(point, Block.SPRUCE_WOOD);
+        }
+        for (BlockVec point : spruceLeaves(decorationPos, height, seed)) {
+
+            tree.addBlock(point, Block.SPRUCE_LEAVES);
         }
         return tree;
     }
@@ -75,12 +81,11 @@ public class TreeDecorators {
     }
 
     // returns set of block positions of spruce tree trunk
-    public static Set<BlockVec> spruceTreeTrunk(Point decorationPos, int seed) {
-        BiFunction<Integer, Double, Double> radiusFunction  = (height, theta) -> {
-            return Math.pow(1.4, -(height))*2.2 + 1;
+    public static Set<BlockVec> spruceTreeTrunk(Point decorationPos, int seed, Function<Integer, Point> centerShift, int height) {
+        BiFunction<Integer, Double, Double> radiusFunction  = (h, theta) -> {
+            return Math.pow(1.4, -(h))*2.2 + 1;
         };
-        int height = 30 + (int) (PointUtils.randomFromCoordinate(seed + 173, decorationPos.blockX(), decorationPos.blockZ()) * 10);
-        Function<Integer, Point> centerShift = n -> spruceCenterShift(decorationPos, seed, n);
+
 
         Set<BlockVec> points = PointUtils.verticalTube(new Pos(0, -2, 0), height, radiusFunction, centerShift);
         return points;
@@ -132,5 +137,12 @@ public class TreeDecorators {
         Point shift = new Pos(.4*Math.cos(startAngle + n/5d+ random), 0, Math.sin(startAngle + n/5d + random)*.4).add(leanDirection.mul(n / 8d));
 
         return shift;
+    }
+
+    public static Set<BlockVec> spruceLeaves(Point decorationPos, int height, int seed) {
+        BiFunction<Integer, Double, Double> radiusFunction = (h, theta) ->  2.5 - (double) ((h) % 3) + (20-h) / 8d;
+        Function<Integer, Point> centerShift = n -> spruceCenterShift(decorationPos, seed, n + 20);
+
+        return PointUtils.verticalTube(new Pos(0, height - 21, 0), 21, radiusFunction, centerShift);
     }
 }

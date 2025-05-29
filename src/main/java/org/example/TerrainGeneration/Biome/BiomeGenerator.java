@@ -41,7 +41,7 @@ public class BiomeGenerator {
         IDtoBiome.put(Biomes.DESERT, new Biome(Block.SAND, new DesertDecorator(), net.minestom.server.world.biome.Biome.DESERT));
         IDtoBiome.put(Biomes.FOREST, new Biome(Block.GRASS_BLOCK, new ForestDecorator(), net.minestom.server.world.biome.Biome.DARK_FOREST));
         IDtoBiome.put(Biomes.TAIGA, new Biome(Block.GRASS_BLOCK, new TaigaDecorator(), net.minestom.server.world.biome.Biome.SNOWY_TAIGA));
-        IDtoBiome.put(Biomes.SNOWY_TUNDRA, new Biome(Block.SNOW_BLOCK, new EmptyDecorator(), net.minestom.server.world.biome.Biome.SNOWY_TAIGA));
+        IDtoBiome.put(Biomes.SNOWY_TUNDRA, new Biome(Block.SNOW_BLOCK, new TundraDecorator(), net.minestom.server.world.biome.Biome.SNOWY_TAIGA));
         IDtoBiome.put(Biomes.HILLY_DESERT, new Biome(Block.SAND, new EmptyDecorator(), net.minestom.server.world.biome.Biome.DESERT));
         IDtoBiome.put(Biomes.LAKE, new Biome(Block.GRAVEL, new WaterDecorator(), net.minestom.server.world.biome.Biome.OCEAN));
         IDtoBiome.put(Biomes.FROZEN_LAKE, new Biome(Block.GRAVEL, new FrozenLakeDecorator(), net.minestom.server.world.biome.Biome.FROZEN_OCEAN));

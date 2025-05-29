@@ -90,6 +90,11 @@ public interface Decorator {
                         return false;
                     }
                 }
+                else if (decorator instanceof TundraDecorator) {
+                    if (value < ((TundraDecorator) decorator).spikeThreshold) {
+                        return false;
+                    }
+                }
             }
         }
         return true;

@@ -87,7 +87,7 @@ public class TerrainGenerator {
                     }
 
                     // set biome
-                    for (int currentHeight = 0; currentHeight <= height + 2; currentHeight++) {
+                    for (int currentHeight = 0; currentHeight <= Math.max(height + 2, 66); currentHeight++) {
 
                         unit.modifier().setBiome(bottom.add(0, currentHeight, 0), biome.getBiomeKey());
                     }

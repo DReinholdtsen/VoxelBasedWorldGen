@@ -1,16 +1,19 @@
 package org.example.TerrainGeneration.Biome.Decorators;
 
+import de.articdive.jnoise.pipeline.JNoise;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
+import org.example.TerrainGeneration.NoiseUtils;
 import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
 public class FrozenLakeDecorator implements Decorator {
+    JNoise noise;
     public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
-
+        noise = NoiseUtils.createNoise(TerrainGenerator.seed + 198378949, .1);
         Point bottom = unit.absoluteStart().add(x, surfaceHeight, z);
-        double random = PointUtils.randomFromCoordinate(TerrainGenerator.seed, bottom.blockX(), bottom.blockZ());
+        double random = noise.evaluateNoise(bottom.blockX(), bottom.blockZ());
 
         unit.modifier().fill(bottom, bottom.add(1, 0, 1).withY(-4), Block.WATER);
         if (random < .5) {
