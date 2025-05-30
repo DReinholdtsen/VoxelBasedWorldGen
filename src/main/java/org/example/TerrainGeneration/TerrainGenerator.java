@@ -1,18 +1,18 @@
 package org.example.TerrainGeneration;
 
-import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
-import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
-import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
+
 import de.articdive.jnoise.pipeline.JNoise;
-import net.minestom.server.MinecraftServer;
+
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
+
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.Generator;
-import net.minestom.server.registry.DynamicRegistry;
+
 import org.example.TerrainGeneration.Biome.Biome;
 import org.example.TerrainGeneration.Biome.BiomeGenerator;
 import org.example.TerrainGeneration.Biome.Biomes;
+import org.example.TerrainGeneration.Biome.Decorators.FrozenLakeDecorator;
+import org.example.TerrainGeneration.Biome.Decorators.WaterDecorator;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -74,16 +74,23 @@ public class TerrainGenerator {
 
                     // set blocks, including cave air blocks
                     int highestRealHeight = 0;
+                    int distanceFromSurface = height;
                     for (int currentHeight = 0; currentHeight < height; currentHeight++) {
                         // find cave noise result at current location, determine if it should be air
                         double caveNoiseResult = caveNoise.evaluateNoise(bottom.blockX(), currentHeight, bottom.blockZ());
                         // otherwise set it to appropriate block
                         if (caveNoiseResult < .4 + currentHeight / 240d) {
-                            unit.modifier().setBlock(bottom.add(0, currentHeight, 0), biome.getSurfaceBlock());
+                            if (distanceFromSurface > 4) {
+                                unit.modifier().setBlock(bottom.add(0, currentHeight, 0), Block.STONE);
+                            } else {
+                                unit.modifier().setBlock(bottom.add(0, currentHeight, 0), biome.getSurfaceBlock());
+                            }
+
                             highestRealHeight = currentHeight;
                         } else {
                             //System.out.println(caveNoiseResult);
                         }
+                        distanceFromSurface -= 1;
                     }
 
                     // set biome
@@ -91,10 +98,9 @@ public class TerrainGenerator {
 
                         unit.modifier().setBiome(bottom.add(0, currentHeight, 0), biome.getBiomeKey());
                     }
-                    if (highestRealHeight > 0) {
+                    if (highestRealHeight > 0 && (height - highestRealHeight < 5 || biome.getDecorator() instanceof FrozenLakeDecorator || biome.getDecorator() instanceof WaterDecorator)) {
                         biome.addDecoration(unit, x, z, highestRealHeight + 1);
-                    }
-                    else {
+                    } else if (highestRealHeight <= 0) {
                         biome.addDecoration(unit, x, z, 1);
                     }
 

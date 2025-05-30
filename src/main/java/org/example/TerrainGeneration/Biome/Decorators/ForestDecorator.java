@@ -14,6 +14,7 @@ public class ForestDecorator implements Decorator {
     public double treeThreshold = .05;
     public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
         Point decorationPos = unit.absoluteStart().add(x, surfaceHeight, z);
+        unit.modifier().setBlock(decorationPos.add(0, -1, 0), Block.GRASS_BLOCK);
         double randomVal = PointUtils.randomFromCoordinate(TerrainGenerator.seed, decorationPos.blockX(), decorationPos.blockZ());
         if (randomVal < treeThreshold) {
             // generate random height tree from 4 to 6
@@ -23,9 +24,16 @@ public class ForestDecorator implements Decorator {
 
                 //unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
             }
-
-
+        } else if (randomVal < .07) {
+            // 3% chance for tall grass, set both blocks of grass
+            unit.modifier().setBlock(decorationPos, Block.TALL_GRASS.withProperty("half", "lower"));
+            unit.modifier().setBlock(decorationPos.add(0, 1, 0), Block.TALL_GRASS.withProperty("half", "upper"));
+        } else if (randomVal < .1) {
+            unit.modifier().setBlock(decorationPos, Block.SHORT_GRASS);
+        } else if (randomVal < .11) {
+            unit.modifier().setBlock(decorationPos, Block.RED_MUSHROOM);
+        } else if (randomVal < .12) {
+            unit.modifier().setBlock(decorationPos, Block.BROWN_MUSHROOM);
         }
-
     }
 }

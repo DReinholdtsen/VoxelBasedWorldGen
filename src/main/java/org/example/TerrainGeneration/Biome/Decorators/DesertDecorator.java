@@ -17,12 +17,15 @@ public class DesertDecorator implements Decorator {
 
         Point bottom = unit.absoluteStart().add(x, surfaceHeight, z);
         double randomVal = PointUtils.randomFromCoordinate(TerrainGenerator.seed, bottom.blockX(), bottom.blockZ());
-        if (randomVal > .01) {
-            // no decoration, return
-            return;
+        if (randomVal < .01) {
+            int decorationHeight = (int) (randomVal * 300 + 1.4);
+            unit.modifier().fill(bottom, bottom.add(1, decorationHeight, 1), Block.CACTUS);
+        } else if (randomVal < .011) {
+            unit.modifier().setBlock(bottom, Block.AZALEA);
+        } else if (randomVal < .012) {
+            unit.modifier().setBlock(bottom, Block.FLOWERING_AZALEA);
         }
-        int decorationHeight = (int) (randomVal * 300) + 1;
-        unit.modifier().fill(bottom, bottom.add(1, decorationHeight, 1), Block.CACTUS);
+
     }
 
 }

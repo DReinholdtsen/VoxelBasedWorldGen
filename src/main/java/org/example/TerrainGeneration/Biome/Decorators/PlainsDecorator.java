@@ -31,7 +31,9 @@ public class PlainsDecorator implements Decorator {
         addFlowerNoise(seed + 8, Block.PINK_TULIP);
     }
     public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
+
         Point decorationPos = unit.absoluteStart().add(x, surfaceHeight, z);
+        unit.modifier().setBlock(decorationPos.add(0, -1, 0), Block.GRASS_BLOCK);
         double randomVal = PointUtils.randomFromCoordinate(TerrainGenerator.seed, decorationPos.blockX(), decorationPos.blockZ());
         if (randomVal < treeThreshold) {
             // check for no tree collisions

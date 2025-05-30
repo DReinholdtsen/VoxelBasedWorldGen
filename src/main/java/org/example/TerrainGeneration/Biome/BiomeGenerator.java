@@ -35,12 +35,12 @@ public class BiomeGenerator {
     // adds biomes to list of biomes, will later use JSON parsing
     private void fillBiomeArray() {
 
-        IDtoBiome.put(Biomes.PLAINS, new Biome(Block.GRASS_BLOCK, new PlainsDecorator(), net.minestom.server.world.biome.Biome.PLAINS));
+        IDtoBiome.put(Biomes.PLAINS, new Biome(Block.DIRT, new PlainsDecorator(), net.minestom.server.world.biome.Biome.PLAINS));
         IDtoBiome.put(Biomes.SAVANNAH, new Biome(Block.ORANGE_WOOL, new EmptyDecorator(), net.minestom.server.world.biome.Biome.SAVANNA));
         IDtoBiome.put(Biomes.MOUNTAINS, new Biome(Block.STONE, new EmptyDecorator(), net.minestom.server.world.biome.Biome.STONY_PEAKS));
         IDtoBiome.put(Biomes.DESERT, new Biome(Block.SAND, new DesertDecorator(), net.minestom.server.world.biome.Biome.DESERT));
-        IDtoBiome.put(Biomes.FOREST, new Biome(Block.GRASS_BLOCK, new ForestDecorator(), net.minestom.server.world.biome.Biome.DARK_FOREST));
-        IDtoBiome.put(Biomes.TAIGA, new Biome(Block.GRASS_BLOCK, new TaigaDecorator(), net.minestom.server.world.biome.Biome.SNOWY_TAIGA));
+        IDtoBiome.put(Biomes.FOREST, new Biome(Block.DIRT, new ForestDecorator(), net.minestom.server.world.biome.Biome.DARK_FOREST));
+        IDtoBiome.put(Biomes.TAIGA, new Biome(Block.DIRT, new TaigaDecorator(), net.minestom.server.world.biome.Biome.SNOWY_TAIGA));
         IDtoBiome.put(Biomes.SNOWY_TUNDRA, new Biome(Block.SNOW_BLOCK, new TundraDecorator(), net.minestom.server.world.biome.Biome.SNOWY_TAIGA));
         IDtoBiome.put(Biomes.HILLY_DESERT, new Biome(Block.SAND, new EmptyDecorator(), net.minestom.server.world.biome.Biome.DESERT));
         IDtoBiome.put(Biomes.LAKE, new Biome(Block.GRAVEL, new WaterDecorator(), net.minestom.server.world.biome.Biome.OCEAN));
