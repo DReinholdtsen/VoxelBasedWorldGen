@@ -12,7 +12,7 @@ import org.example.TerrainGeneration.Biome.Biome;
 import org.example.TerrainGeneration.Biome.BiomeGenerator;
 import org.example.TerrainGeneration.Biome.Biomes;
 import org.example.TerrainGeneration.Biome.Decorators.FrozenLakeDecorator;
-import org.example.TerrainGeneration.Biome.Decorators.WaterDecorator;
+import org.example.TerrainGeneration.Biome.Decorators.LakeDecorator;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -43,7 +43,6 @@ public class TerrainGenerator {
             Random random = new Random((long) (Math.pow(start.blockX(), 2) + Math.pow(start.blockZ(), 2)));
             for (int x = 0; x < size.blockX(); x++) {
                 for (int z = 0; z < size.blockZ(); z++) {
-                    Heightmap unitHeightmap = new Heightmap(size.blockX(), size.blockZ());
                     Point bottom = start.add(x, 0, z);
                     double doubleHeight = 0;
                     double hillinessValue = hilliness.getHeight(bottom.blockX(), bottom.blockZ());
@@ -57,13 +56,20 @@ public class TerrainGenerator {
                     int height = (int) doubleHeight;
                     height += 60;
                     Biome biome = biomeGenerator.getBiome(bottom.blockX(), bottom.blockZ());
-                    if (height < 60) {
-                        if (biome.getSurfaceBlock() == Block.SNOW_BLOCK || biome.getBiomeKey() == net.minestom.server.world.biome.Biome.SNOWY_TAIGA) {
-                            // frozen lake
-                            biome = biomeGenerator.IDtoBiome.get(Biomes.FROZEN_LAKE);
+                    // determine if biome should be lake/frozen lake or beachbased on height
+                    if (height < 63) {
+                        if (height < 60) {
+                            if (biome.getSurfaceBlock() == Block.SNOW_BLOCK || biome.getBiomeKey() == net.minestom.server.world.biome.Biome.SNOWY_TAIGA) {
+                                // frozen lake
+                                biome = biomeGenerator.IDtoBiome.get(Biomes.FROZEN_LAKE);
+                            } else {
+                                biome = biomeGenerator.IDtoBiome.get(Biomes.LAKE);
+                            }
                         } else {
-                            biome = biomeGenerator.IDtoBiome.get(Biomes.LAKE);
+                            // between 63 and 60, beach
+                            biome = biomeGenerator.IDtoBiome.get(Biomes.BEACH);
                         }
+
 
 
                     }
@@ -98,7 +104,7 @@ public class TerrainGenerator {
 
                         unit.modifier().setBiome(bottom.add(0, currentHeight, 0), biome.getBiomeKey());
                     }
-                    if (highestRealHeight > 0 && (height - highestRealHeight < 5 || biome.getDecorator() instanceof FrozenLakeDecorator || biome.getDecorator() instanceof WaterDecorator)) {
+                    if (highestRealHeight > 0 && (height - highestRealHeight < 5 || biome.getDecorator() instanceof FrozenLakeDecorator || biome.getDecorator() instanceof LakeDecorator)) {
                         biome.addDecoration(unit, x, z, highestRealHeight + 1);
                     } else if (highestRealHeight <= 0) {
                         biome.addDecoration(unit, x, z, 1);
@@ -108,6 +114,8 @@ public class TerrainGenerator {
             }
         };
     }
+
+    // initializes height generators of different scales and purposes and adds them to list
     public void initializeHeightGenerators() {
         elevationNoises = new ArrayList<HeightGenerator>();
         HeightGenerator base = new HeightGenerator(seed, .01, noiseValue -> ((noiseValue + 1) * 10));
@@ -128,6 +136,7 @@ public class TerrainGenerator {
         elevationNoises.add(negativeGenerator);
     }
 
+    // returns the generator object (what the server actually uses) of the TerrainGenerator
     public Generator getGenerator() {
         return this.generator;
     }

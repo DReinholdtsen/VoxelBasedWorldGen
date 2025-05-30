@@ -5,11 +5,14 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 import org.example.TerrainGeneration.NoiseUtils;
-import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
+// Decorator for frozen lake biome
+// Like a regular lake but with ice.
 public class FrozenLakeDecorator implements Decorator {
     JNoise noise;
+
+    // Adds water above surface as well as ice on surface
     public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
         noise = NoiseUtils.createNoise(TerrainGenerator.seed + 198378949, .1);
         Point bottom = unit.absoluteStart().add(x, surfaceHeight, z);

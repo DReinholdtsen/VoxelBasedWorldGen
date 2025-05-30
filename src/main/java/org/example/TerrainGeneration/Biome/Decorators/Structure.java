@@ -6,7 +6,7 @@ import net.minestom.server.instance.block.Block;
 
 import java.util.*;
 // represents a set of block locations and the corresponding block type
-// written by ChatGPT
+// written by ChatGPT (you can tell by the comments)
 public class Structure {
 
     // Map from Block type to set of relative Vec positions

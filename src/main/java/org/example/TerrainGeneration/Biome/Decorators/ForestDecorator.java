@@ -1,31 +1,32 @@
 package org.example.TerrainGeneration.Biome.Decorators;
 
-import de.articdive.jnoise.pipeline.JNoise;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
-import org.example.TerrainGeneration.NoiseUtils;
 import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
-import java.util.Random;
-
+// Decorator for forest biome
+// Includes dense trees as well as grass and mushrooms
 public class ForestDecorator implements Decorator {
     public double treeThreshold = .05;
+
+    // Adds appropriate forest decoration
     public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
+        // find decoration position
         Point decorationPos = unit.absoluteStart().add(x, surfaceHeight, z);
+        // set top block to grass as it's dirt by default
         unit.modifier().setBlock(decorationPos.add(0, -1, 0), Block.GRASS_BLOCK);
+        // determine decoration and place
         double randomVal = PointUtils.randomFromCoordinate(TerrainGenerator.seed, decorationPos.blockX(), decorationPos.blockZ());
         if (randomVal < treeThreshold) {
             // generate random height tree from 4 to 6
-            if (Decorator.validTreeLocation(decorationPos.blockX(), decorationPos.blockZ())) {
+            if (Decorator.validDecorationLocation(decorationPos.blockX(), decorationPos.blockZ())) {
                 // check for collisions
                 unit.fork(Decorator.structureToSetter(TreeDecorators.generateTree(decorationPos, TerrainGenerator.seed), decorationPos));
-
-                //unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
             }
         } else if (randomVal < .07) {
-            // 3% chance for tall grass, set both blocks of grass
+            // other small surface vegetation decoration.
             unit.modifier().setBlock(decorationPos, Block.TALL_GRASS.withProperty("half", "lower"));
             unit.modifier().setBlock(decorationPos.add(0, 1, 0), Block.TALL_GRASS.withProperty("half", "upper"));
         } else if (randomVal < .1) {

@@ -2,25 +2,21 @@ package org.example.TerrainGeneration.Biome.Decorators;
 
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
-import org.example.TerrainGeneration.Biome.Biome;
-import org.example.TerrainGeneration.Biome.BiomeGenerator;
 import org.example.TerrainGeneration.PointUtils;
 import org.example.TerrainGeneration.TerrainGenerator;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
+// Interface that can be called at a specific position to place an implemented decoration
+// Also contains helper methods for decorations
 public interface Decorator {
-    public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight);
+    void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight);
 
-    public static Consumer<Block.Setter> structureToSetter(Structure structure, Point decorationPos) {
+    static Consumer<Block.Setter> structureToSetter(Structure structure, Point decorationPos) {
         return setter -> {
             Map<Block, Set<BlockVec>> blockSetMap = structure.getBlockMap();
             for (Block block : blockSetMap.keySet()) {
@@ -31,52 +27,25 @@ public interface Decorator {
             }
         };
     }
-    public static Consumer<Block.Setter> createTreeSetter(Point decorationPos, int height) {
-        return setter -> {
 
-            for (int y = 0; y < height; y++) {
-                setter.setBlock(decorationPos.add(0, y, 0), Block.OAK_LOG);
-            }
-            for (int x = -2; x <= 2; x++) {
-                // x coordinate for leaves relative to trunk
-                for (int z = -2; z <= 2; z++) {
-                    // same thing
-                    // check to make sure not overriding trunk
-                    int startHeight = height - 3;
-                    int maxHeight = height + 1;
-                    if (Math.abs(x) == 2 && Math.abs(z) == 2) {
-                        // no corners
-                        continue;
-                    }
-                    if (x == 0 && z == 0) {
-                        startHeight = height;
-                        maxHeight += 1;
-                    }
-                    if (Math.abs(x) == 2 || Math.abs(z) == 2) {
-                        maxHeight -= 1;
-                    }
-                    for (int y = startHeight; y < maxHeight; y++) {
-                        setter.setBlock(decorationPos.add(x, y, z), Block.OAK_LEAVES);
-                    }
-
-                }
-            }
-        };
-    }
-    public static boolean validTreeLocation(int x, int z) {
-        // check n by n before tree location for other trees
+    // determines whether a location is a valid location for a decoration (other decoration nearby or not)
+    static boolean validDecorationLocation(int x, int z) {
+        // check all n by n square around point for other decorations
         for (int deltaX = -4; deltaX < 5; deltaX++) {
             for (int deltaZ = -4; deltaZ <= 0; deltaZ++) {
                 if (deltaZ == 0) {
                     if (deltaX >= 0) {
                         continue;
                     }
-                    // dont check, has tree if this is called
+                    // dont check, has decoration if this is called
                 }
                 int newX = x + deltaX;
                 int newZ = z + deltaZ;
+                // get decorator and simulate random value
                 Decorator decorator = TerrainGenerator.biomeGenerator.getBiome(newX, newZ).getDecorator();
                 double value = PointUtils.randomFromCoordinate(TerrainGenerator.seed, newX, newZ);
+                // check if any biomes with large decorators would have generated at point
+                // if so, return false
                 if (decorator instanceof PlainsDecorator) {
                     if (value < ((PlainsDecorator) decorator).treeThreshold) {
                         return false;

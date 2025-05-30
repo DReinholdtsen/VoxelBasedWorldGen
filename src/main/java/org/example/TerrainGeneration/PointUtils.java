@@ -13,9 +13,8 @@ import java.util.function.Function;
 public class PointUtils {
     public static final Function<Point, Double> EUCLIDEAN = point -> point.distanceSquared(Pos.ZERO);
     public static final Function<Point, Double> CUBE = point -> Math.max(Math.max(point.x(), point.y()), point.z());
-    public static Set<Point> bezierCurve(Point point1, Point point2, Point point3) {
-        return bezierCurve(point1, point2, point3, t -> 1d, EUCLIDEAN);
-    }
+
+    // calls bezier curve with regular euclidean distance function
     public static Set<Point> bezierCurve(Point point1, Point point2, Point point3, Function<Double, Double> thicknessFunction) {
         return bezierCurve(point1, point2, point3, thicknessFunction, EUCLIDEAN);
     }
@@ -44,7 +43,7 @@ public class PointUtils {
         return points;
     }
 
-
+    // takes three control points and a t value and returns the corresponding point on bezier curve.
     public static Point bezierPoint(double t, Point p0, Point p1, Point p2)
     {
         Point p = new Pos(p0.mul(Math.pow(1-t, 2)).add(p1.mul(2 * (1-t) * t)).add(p2.mul(t*t)));
@@ -52,6 +51,7 @@ public class PointUtils {
         return p;
     }
 
+    // returns all voxel points forming rectangular prism with two points on opposite corners.
     public static BlockVec[] rectangularPrism(Point p1, Point p2) {
         int minX = Math.min(p1.blockX(), p2.blockX());
         int minY = Math.min(p1.blockY(), p2.blockY());
@@ -98,11 +98,14 @@ public class PointUtils {
         }
         return points;
     }
+
+    // calls vertical tube with no center shift.
     public static Set<BlockVec> verticalTube(Point bottomPos, int height, BiFunction<Integer, Double, Double> radiusFunction) {
         return verticalTube(bottomPos, height, radiusFunction, h -> Pos.ZERO);
     }
 
     // Returns a set of all voxels contained on a line between two points
+    // Written by ChatGPT
     public static Set<BlockVec> line(Point p1, Point p2) {
         // 1) shift both points up 0.5 so we're shooting through block-centers vertically
         p1 = p1.add(0, 0.5, 0);
@@ -161,13 +164,15 @@ public class PointUtils {
         return voxels;
     }
 
-
+    // hashing function that returns a double from 0 to 1 based on seeding
     public static double randomFromCoordinate(int seed, int x, int z) {
-         long h = seed * 374761393 + x * 668265263 + z * 2246822519L;
-         h = (h ^ (h >> 13)) * 1274126177;
-         h = h ^ (h >> 16);
-         long unsigned = Math.abs(h);
-         return (unsigned & 0xFFFFFFFFL) / (double)(1L << 32);
+        // black magic
+        long h = seed * 374761393 + x * 668265263 + z * 2246822519L;
+        h = (h ^ (h >> 13)) * 1274126177;
+        h = h ^ (h >> 16);
+        long unsigned = Math.abs(h);
+        // puts in range (0, 1)
+        return (unsigned & 0xFFFFFFFFL) / (double)(1L << 32);
     }
 
     // returns the L_p norm with specified p value. p = 1 -> Manhattan, p = 2 -> Euclidean, p = inf -> cube

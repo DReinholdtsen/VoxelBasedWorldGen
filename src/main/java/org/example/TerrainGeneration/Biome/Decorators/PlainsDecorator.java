@@ -20,6 +20,7 @@ public class PlainsDecorator implements Decorator {
     public PlainsDecorator() {
         super();
         int seed = TerrainGenerator.seed + 824;
+        // adds noise maps for all types of flowers
         addFlowerNoise(seed, Block.POPPY);
         addFlowerNoise(seed + 1, Block.DANDELION);
         addFlowerNoise(seed + 2, Block.ALLIUM);
@@ -30,15 +31,17 @@ public class PlainsDecorator implements Decorator {
         addFlowerNoise(seed + 7, Block.WHITE_TULIP);
         addFlowerNoise(seed + 8, Block.PINK_TULIP);
     }
-    public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
 
+    // adds appropriate decoration to plains
+    public void addDecoration(GenerationUnit unit, int x, int z, int surfaceHeight) {
+        // finds decoration pisition
         Point decorationPos = unit.absoluteStart().add(x, surfaceHeight, z);
         unit.modifier().setBlock(decorationPos.add(0, -1, 0), Block.GRASS_BLOCK);
         double randomVal = PointUtils.randomFromCoordinate(TerrainGenerator.seed, decorationPos.blockX(), decorationPos.blockZ());
         if (randomVal < treeThreshold) {
             // check for no tree collisions
             // generate random height tree from 4 to 6
-            if (Decorator.validTreeLocation(decorationPos.blockX(), decorationPos.blockZ())) {
+            if (Decorator.validDecorationLocation(decorationPos.blockX(), decorationPos.blockZ())) {
                 unit.fork(Decorator.structureToSetter(TreeDecorators.generateTree(decorationPos, TerrainGenerator.seed), decorationPos));
                 //unit.fork(Decorator.createTreeSetter(decorationPos, 4 + (int) (randomVal/treeThreshold * 3)));
             }
@@ -52,9 +55,10 @@ public class PlainsDecorator implements Decorator {
 
         }
         else if (randomVal < .8) {
-
+            // prevents flowers from spawning in every block in a zone.
         }
         else {
+            // no other decorations; check for flowers
             for (Pair<JNoise, Block> pair : flowerNoises) {
                 JNoise noise = pair.first();
                 Block flowerType = pair.second();
